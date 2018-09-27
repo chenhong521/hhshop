@@ -1,6 +1,6 @@
 <template>
   <div class="activity">
-    <div class="card">
+    <!-- <div class="card">
       <div class="card-title">
         <span>贷款现金红包</span>
       </div>
@@ -53,7 +53,8 @@
       <div class="card-bot">
         <span>立即使用</span>
       </div>
-    </div>
+    </div> -->
+    <img src="../../common/img/850168899465611959.png" alt="service" width="100%">
   </div>
 </template>
 <script>

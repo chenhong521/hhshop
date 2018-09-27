@@ -1,15 +1,15 @@
 <template>
   <header class="header">
     <div class="headerTop">
-      <span class="headerTopleft" @click="$router.back(-1)"><i class="iconfont icon-zuo"></i></span>
+      <a class="headerTopleft" href="https://fjhhjr.com/app/index.php?i=1&c=entry&m=ewei_shopv2&do=mobile"><i class="iconfont icon-zuo"></i></a>
       <span class="headerTopright"><i class="iconfont icon-chakan"></i></span>
     </div>
     <div class="headerCon">
-      <div class="avatar"><img src="../../common/img/logo@2x.png" alt="logo" width="100%" /></div>
+      <div class="avatar"><img :src="logoUrl+TopData.logo" width="100%" /></div>
       <div class="shopName">
-        <h1 class="headerTitle">平安银行</h1>
-        <span>动态&nbsp;&nbsp;781</span>&nbsp;&nbsp;&nbsp;<span>关注数&nbsp;&nbsp;1871</span>
-        <span class="guanzhu" @click="guanzhu = !guanzhu"><i class="iconfont" :class="guanzhu?'icon-dagou1':'icon-tianjia'" style="font-size:14px"></i>关注</span>
+        <h1 class="headerTitle">{{TopData.merchname}}</h1>
+        <span>动态&nbsp;&nbsp;{{TopData.c}}</span>&nbsp;&nbsp;<span>关注数&nbsp;&nbsp;{{TopData.follow}}</span>
+        <span class="guanzhu" @click="guanzhu"><i class="iconfont" :class="isfollow===1?'icon-dagou1':'icon-tianjia'" style="font-size:14px"></i>关注</span>
       </div>
     </div>
     <div class="headerBottom">
@@ -20,11 +20,42 @@
 </template>
 
 <script>
+import MyAjax from '../../common/js/ajax.js'
+import {mapState} from 'vuex'
 export default {
   data () {
     return {
-      guanzhu: false
+      TopData: '',
+      logoUrl: 'https://fjhhjr.com/attachment/',
+      isfollow: 0
     }
+  },
+  async created () {
+    const result = await MyAjax(`./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=wt.store.getinfo&storeid=${this.storeid}`)
+    if (result.status === 1) {
+      this.TopData = result.result.data
+      this.isfollow = result.result.data.isfollow
+    }
+    // this.WXConfig.wxShowMenu(`商户店铺-${this.TopData.merchname}`, '', `https://fjhhjr.com/attachment/${this.TopData.logo}`)
+    this.$store.dispatch('reBbsid', this.TopData.bbsid)
+    this.$store.dispatch('relogo', this.TopData.logo)
+  },
+  methods: {
+    getUrlKey (name) {
+      // eslint-disable-next-line
+      return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+    },
+    async guanzhu () {
+      if (this.isfollow === 0) {
+        var isguan = await MyAjax(`./index.php?i=1&c=entry&m=ewei_shopv2&do=mobile&r=wt.store.follow&bbsid=${this.TopData.bbsid}`)
+        if (isguan.status === 1) {
+          this.isfollow = 1
+        }
+      }
+    }
+  },
+  computed: {
+    ...mapState(['storeid'])
   }
 }
 </script>
@@ -32,12 +63,10 @@ export default {
 <style lang="stylus" rel="stylesheet/stylus">
 @import "../../common/stylus/mixins.styl"
 .header
-  // position fixed
-  // z-index 10
   width 100%
   height 165px
   color #fff
-  background url('../../common/img/header@2x.png') no-repeat
+  background url($url) no-repeat
   background-size cover
   .headerTop
     width 100%
@@ -49,6 +78,7 @@ export default {
       left 20px
       .iconfont
         font-size 25px
+        color #ffffff
     .headerTopright
       line-height 50px
       position absolute
@@ -61,9 +91,12 @@ export default {
     .avatar
       height 65px
       width 65px
-      border-radius 50%
       margin 0 20px
       margin-top 5px
+      background-color #ffffff
+      border-radius 50%
+      img
+        border-radius 50%
     .shopName
       width 66%
       h1
